@@ -1,0 +1,23 @@
+@font-face {
+  font-family: eleme;
+  src: url('./assets/eleme.woff');
+}
+
+.icon-eleme {
+  font-family: eleme;
+  font-style: normal;
+  font-weight: 400;
+  font-feature-settings: normal;
+  font-variant: normal;
+  text-transform: none;
+}
+
+.topbar-logo:before {
+  content: "\e92c";
+}
+
+.content-header {
+  width: 100%;
+  height: 60px;
+  background-color: #1e89e0;
+}
