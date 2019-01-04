@@ -10,7 +10,6 @@
               <MenuItem to="/order" name="/order">我的订单</MenuItem>
               <MenuItem to="/join" name="/join">加盟合作</MenuItem>
               <MenuItem to="/service" name="/service">我的客服</MenuItem>
-              <MenuItem name="other"></MenuItem>
             </Menu>
           </div>
           <div class="main-header-right"></div>
@@ -64,8 +63,8 @@ export default {
   align-items: center;
 }
 .main-header-left {
-  width: auto;
   height: 100%;
+  flex: 1;
 }
 .main-header-logo {
   float: left;
@@ -91,9 +90,9 @@ export default {
   width: 100px !important;
   text-align: center !important;
 }
-.ivu-menu-item:last-child {
-  width: 0 !important;
-}
+// .ivu-menu-item:last-child {
+//   width: 0 !important;
+// }
 .ivu-menu-item-selected {
   background-color: #006bc7;
 }

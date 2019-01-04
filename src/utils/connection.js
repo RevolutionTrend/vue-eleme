@@ -1,5 +1,7 @@
+const URLHost = 'http://localhost:8008/api/';
+
 const getEncodeURL = (url, data) => {
-  let str = url;
+  let str = URLHost + url;
   if (typeof data === 'string') {
     str += '?' + data;
   } else if (typeof data === 'object') {

@@ -16,6 +16,10 @@
   content: "\e92c";
 }
 
+.icon-mobile:before {
+  content: "\e92e";
+}
+
 .content-header {
   width: 100%;
   height: 60px;
