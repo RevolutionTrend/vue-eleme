@@ -1,7 +1,7 @@
 <template>
   <div id="main">
     <Layout>
-      <Header :style="headerStyle">
+      <Header class="custom-header" :class="getCustomBg">
         <div class="main-width main-header">
           <div class="main-header-left">
             <i class="main-header-logo icon-eleme topbar-logo"></i>
@@ -36,18 +36,12 @@ Vue.component("MenuItem", MenuItem);
 
 export default {
   name: "Main",
-  data() {
-    return {
-      headerStyle: {
-        position: "fixed",
-        width: "100%",
-        padding: 0,
-        backgroundColor:
-          this.$route.path === "/order" ? "transparent" : "#1e89e0",
-        height: "60px",
-        zIndex: 999
-      }
-    };
+  computed: {
+    getCustomBg() {
+      return this.$route.path === "/merchant"
+        ? "custom-header-bgimg"
+        : "custom-header-bgcolor";
+    }
   }
 };
 </script>
@@ -55,6 +49,23 @@ export default {
 <style lang="scss">
 #main {
   height: 100%;
+}
+.custom-header {
+  position: fixed;
+  width: 100%;
+  padding: 0 !important;
+  height: 60px !important;
+  z-index: 999;
+}
+.custom-header-bgcolor {
+  background-color: #1e89e0 !important;
+}
+.custom-header-bgimg {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  background-image: url("../assets/shop-bg.jpg") !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  background-size: 1920px 190px !important;
 }
 .ivu-layout {
   height: 100%;
