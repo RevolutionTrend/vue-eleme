@@ -42,8 +42,10 @@ export default {
         position: "fixed",
         width: "100%",
         padding: 0,
-        backgroundColor: "transparent",
-        height: "60px"
+        backgroundColor:
+          this.$route.path === "/order" ? "transparent" : "#1e89e0",
+        height: "60px",
+        zIndex: 999
       }
     };
   }
@@ -51,8 +53,17 @@ export default {
 </script>
 
 <style lang="scss">
+#main {
+  height: 100%;
+}
+.ivu-layout {
+  height: 100%;
+}
+.ivu-layout-content {
+  background-color: #f5f7f9;
+}
 .main-width {
-  width: 960px;
+  width: 962px;
 }
 .main-header {
   height: 100%;
@@ -96,10 +107,16 @@ export default {
 .ivu-menu-item-selected {
   background-color: #006bc7;
 }
+.merchant-width {
+  width: 320px;
+}
 
 @media (min-width: 1260px) {
   .main-width {
-    width: 1180px;
+    width: 1182px;
+  }
+  .merchant-width {
+    width: 295px;
   }
 }
 </style>

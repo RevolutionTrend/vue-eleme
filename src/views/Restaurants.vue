@@ -3,33 +3,340 @@
     <div class="content-header"></div>
     <div class="content-container main-width">
       <ContentHeader/>
+      <div class="content-category">
+        <span class="content-all-category category-text">全部商家：</span>
+        <div class="content-category-right">
+          <ul class="category-ul">
+            <li
+              v-for="(item, index) in categorys"
+              :key="item.id"
+              class="category-li"
+              :class="index === selectedIndex ? 'category-li-selected' : ''"
+              @click="changeCagegory(index)"
+            >
+              <span class="category-text">{{item.name}}</span>
+            </li>
+          </ul>
+          <ul
+            class="category-ul"
+            :style="{backgroundColor: '#f6f6f6', padding: '6px 0'}"
+            v-if="subCategorys.length>0"
+          >
+            <li
+              v-for="(item, index) in subCategorys"
+              :key="item.id"
+              class="category-li"
+              :class="index === subSelectedIndex ? 'category-subli-selected' : ''"
+              @click="changeSubCagegory(index)"
+            >
+              <span class="category-text">{{item.name}}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content-merchant">
+        <ul class="merchant-ul">
+          <li class="merchant-width merchant-li" v-for="merchant in restaurants" :key="merchant.id">
+            <div class="merchant-logo-area">
+              <img :src="getLogoPath(merchant.image_path)">
+              <span>{{merchant.order_lead_time + ' 分钟'}}</span>
+            </div>
+            <div class="merchant-main">
+              <span class="merchant-name">{{merchant.name}}</span>
+              <Rate disabled show-text :value="merchant.rating"></Rate>
+              <span class="merchant-fee">{{merchant.piecewise_agent_fee.description}}</span>
+              <div class="merchant-flags">
+                <span class="support-flag support-flag-new" v-if="merchant.is_new">新</span>
+                <span
+                  class="support-flag"
+                  v-for="support in merchant.supports"
+                  :key="support.id"
+                >{{support.icon_name}}</span>
+              </div>
+              <div class="grey-rate" :style="getRateGrey(merchant.rating)">
+                <div class="grey-rate-container">
+                  <Rate disabled :value="0"></Rate>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { Rate } from "iview";
 import ContentHeader from "../components/ContentHeader.vue";
-// import vueFetch from "../utils/connection.js";
+import vueFetch from "../utils/connection.js";
+import globalTools from "../utils/tools.js";
 
-// vueFetch("POST", "map", {
-//   ip: "117.136.46.108"
-// }).then(function(res) {
-//   console.log(res);
+// let categorys = [];
+// vueFetch("GET", "category", {
+//   latitude: 31.973492,
+//   longitude: 118.775854
+// }).then(function(data) {
+//   if (data && Array.isArray(data)) {
+//     categorys = data;
+//   }
+// });
+
+// vueFetch("GET", "restaurants", {
+//   "extras[]": "activities",
+//   geohash: "wtsmyu9gjfzu",
+//   latitude: 31.973492,
+//   limit: 24,
+//   longitude: 118.775854,
+//   offset: 0,
+//   terminal: "web"
+// }).then(function(data) {
+//   console.log(data);
 // });
 
 export default {
   name: "Restaurants",
+  data() {
+    return {
+      categorys: [],
+      subCategorys: [],
+      restaurants: [],
+      selectedIndex: 0,
+      subSelectedIndex: 0
+    };
+  },
+  computed: {},
+  methods: {
+    changeCagegory(index) {
+      if (index === this.$data.selectedIndex) return;
+      this.$data.selectedIndex = index;
+      this.$data.subSelectedIndex = 0;
+      this.$data.subCategorys =
+        this.$data.categorys.length > 0 &&
+        this.$data.categorys[index].hasOwnProperty("sub_categories")
+          ? this.$data.categorys[index].sub_categories
+          : [];
+    },
+    changeSubCagegory(index) {
+      if (index === this.$data.subSelectedIndex) return;
+      this.$data.subSelectedIndex = index;
+    },
+    getLogoPath(path) {
+      return globalTools.convertImagePath(path);
+    },
+    getRateGrey(rating) {
+      const width = 20 * (5 - rating);
+      return {
+        width: width + "px",
+        marginLeft: 100 - width + "px"
+      };
+    }
+  },
   components: {
-    ContentHeader
+    ContentHeader,
+    Rate
+  },
+  mounted() {
+    vueFetch("GET", "category", {
+      latitude: 31.973492,
+      longitude: 118.775854
+    }).then(data => {
+      if (data && Array.isArray(data)) {
+        this.$data.categorys = data;
+        // this.$set(this.$data, "categorys", data);
+      }
+    });
+    vueFetch("GET", "restaurants", {
+      "extras[]": "activities",
+      geohash: "wtsmyu9gjfzu",
+      latitude: 31.973492,
+      limit: 24,
+      longitude: 118.775854,
+      offset: 0,
+      terminal: "web"
+    }).then(data => {
+      if (data && Array.isArray(data)) {
+        this.$data.restaurants = data;
+      }
+    });
   }
 };
 </script>
 
 
 <style lang="scss">
-.content-container {
+.content-category {
+  width: 100%;
   height: auto;
-  margin: 0 auto;
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #e6e6e6;
+}
+.content-all-category {
+  color: #999;
+}
+.category-text {
+  width: auto;
+  padding: 1px 10px;
+  margin: 5px 0;
+  display: block;
+  line-height: 26px;
+}
+.content-category-right {
+  flex: 1;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.category-ul {
+  display: block;
+  width: 100%;
+  height: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.category-li {
+  width: auto;
+  height: auto;
+  float: left;
+  padding: 0 6px;
+  cursor: pointer;
+  color: #666;
+}
+.category-li > .category-text:hover {
+  background-color: #f6f6f6;
+  border-radius: 3px;
+}
+.category-li-selected {
+  background-color: #f6f6f6;
+  color: #0089dc !important;
+}
+.category-subli-selected {
+  .category-text {
+    color: #fff !important;
+    background-color: #0089dc !important;
+    border-radius: 3px;
+  }
+}
+.content-merchant {
+  width: 100%;
+  height: auto;
+  border: 1px solid #e6e6e6;
+  background-color: #fff;
+  margin-top: 20px;
+}
+.merchant-ul {
+  width: 100%;
+  height: auto;
+  list-style: none;
+  display: inline-block;
+}
+.merchant-li {
+  height: 140px;
+  float: left;
+  cursor: pointer;
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+.merchant-li:hover {
+  background-color: #f5f5f5;
+}
+.merchant-logo-area {
+  width: 70px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  & > img {
+    width: 70px;
+    height: 70px;
+  }
+  & > span {
+    font-weight: 400;
+    font-size: 12px;
+    color: #999;
+  }
+}
+.merchant-main {
+  width: calc(100% - 90px);
+  height: 100%;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.merchant-name {
+  width: 100%;
+  font-size: 16px;
+  font-weight: 800;
+  color: #000;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.merchant-name:hover {
+  color: #0089dc;
+}
+.ivu-rate-star {
+  margin-right: 0 !important;
+}
+.merchant-fee {
+  font-size: 12px;
+  font-weight: 400;
+  color: #999;
+}
+.merchant-flags {
+  width: 100%;
+  height: 20px;
+}
+.support-flag {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #999;
+  line-height: 16px;
+  float: left;
+  border-radius: 2px;
+  margin-right: 3px;
+  margin-top: 1px;
+}
+.support-flag-new {
+  border-color: #e75959 !important;
+  background-color: #e75959;
+  color: #fff !important;
+}
+.grey-rate {
+  position: absolute;
+  height: 32px;
+  margin-top: 26px;
+  overflow: hidden;
+}
+.grey-rate-container {
+  float: right;
+  width: 100px;
+  height: 32px;
+}
+.ivu-rate-text {
+  color: #999 !important;
+  & > span:last-child {
+    display: none;
+  }
 }
 </style>
 

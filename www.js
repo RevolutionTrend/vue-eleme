@@ -62,6 +62,44 @@ app.post('/api/map', function (req, res) {
   }, 500);
 });
 
+app.get('/api/restaurants', function (req, res) {
+  const start = req.query.offset;
+  const len = req.query.limit;
+  const end = start + len;
+  fs.open('./docs/restaurants.json', 'r', function (err, fd) {
+    if (err) {
+      console.log(err);
+      res.status(404).end();
+    }
+    fs.readFile('./docs/restaurants.json', function (error, data) {
+      // console.log(data.toString());
+      const list = JSON.parse(data.toString());
+      console.log(list.length);
+
+      fs.close(fd, function (err) {
+        res.send(list.slice(start, Math.min(list.length, end))).end();
+      });
+
+    });
+  });
+});
+
+app.get('/api/category', function (req, res) {
+  fs.open('./docs/category.json', 'r', function (err, fd) {
+    if (err) {
+      console.log(err);
+      res.status(404).end();
+    }
+    fs.readFile('./docs/category.json', function (error, data) {
+      const arr = JSON.parse(data.toString());
+
+      fs.close(fd, function () {
+        res.send(arr).end();
+      });
+    })
+  });
+});
+
 app.listen('8008', function () {
   console.log('runing on port 8008.')
 });
