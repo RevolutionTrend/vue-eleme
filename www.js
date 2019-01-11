@@ -30,14 +30,7 @@ app.use('/', function (req, res, next) {
   }
 });
 
-app.get('/api/speed_info', function (req, res) {
-  const speed = {
-    up: Math.ceil(Math.random() * 512),
-    down: Math.ceil(Math.random() * 1024)
-  };
-  console.log('speed_info: ' + JSON.stringify(speed));
-  res.send(speed).end();
-});
+let allRestaurants = [];
 
 app.post('/api/map', function (req, res) {
   console.log(req.query);
@@ -63,9 +56,34 @@ app.post('/api/map', function (req, res) {
 });
 
 app.get('/api/restaurants', function (req, res) {
-  const start = req.query.offset;
-  const len = req.query.limit;
+  const start = parseInt(req.query.offset, 10);
+  const len = parseInt(req.query.limit, 10);
   const end = start + len;
+  console.log(`start === ${start}, end === ${end}`);
+
+  if (allRestaurants.length < 1) {
+    fs.open('./docs/restaurants.json', 'r', function (err, fd) {
+      if (err) {
+        console.log(err);
+        res.status(404).end();
+      }
+      fs.readFile('./docs/restaurants.json', function (error, data) {
+        // console.log(data.toString());
+        const list = JSON.parse(data.toString());
+        console.log(list.length);
+
+        fs.close(fd, function (err) {
+          res.send(list.slice(start, Math.min(list.length, end))).end();
+        });
+
+      });
+    });
+  } else {
+    res.send(allRestaurants.slice(start, Math.min(allRestaurants.length, end))).end();
+  }
+});
+
+app.get('/api/repeat', function (req, res) {
   fs.open('./docs/restaurants.json', 'r', function (err, fd) {
     if (err) {
       console.log(err);
@@ -76,10 +94,21 @@ app.get('/api/restaurants', function (req, res) {
       const list = JSON.parse(data.toString());
       console.log(list.length);
 
-      fs.close(fd, function (err) {
-        res.send(list.slice(start, Math.min(list.length, end))).end();
+      let arr = [];
+      let finalList = [];
+      list.forEach(function (item) {
+        if (!arr.includes(item.id)) {
+          arr.push(item.id);
+          finalList.push(item);
+        }
       });
 
+      fs.writeFile('./docs/restaurants2.json', JSON.stringify(finalList), function () {
+        fs.close(fd, function (closeErr) {
+          console.log(closeErr);
+          res.send().end();
+        });
+      });
     });
   });
 });

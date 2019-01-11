@@ -52,7 +52,11 @@
               <div class="merchant-in-tip">
                 <div class="merchant-logo-area">
                   <img :src="getLogoPath(merchant.image_path)">
-                  <span>{{merchant.order_lead_time + ' 分钟'}}</span>
+                  <span
+                    :class="merchant.order_lead_time>45?'time-long':'time-normal'"
+                  >{{(merchant.order_lead_time>45?'45+': merchant.order_lead_time) + ' 分钟'}}</span>
+                  <!-- <span v-if="merchant.order_lead_time<=45">{{merchant.order_lead_time + ' 分钟'}}</span>
+                  <span v-if="merchant.order_lead_time>45" style="color: red;">45+ 分钟</span>-->
                 </div>
                 <div class="merchant-main">
                   <span class="merchant-name">{{merchant.name}}</span>
@@ -86,10 +90,30 @@
                   <span class="support-flag">{{flag.icon_name}}</span>
                   <span class="merchant-rst-desc">{{flag.description}}</span>
                 </div>
+                <ul class="merchant-time-fee">
+                  <li>{{merchant.piecewise_agent_fee.tips}}</li>
+                  <li>
+                    平均
+                    <span>{{merchant.order_lead_time}}</span>分钟送达
+                  </li>
+                </ul>
+                <span
+                  class="merchant-promotion"
+                  v-if="merchant.promotion_info"
+                >{{merchant.promotion_info}}</span>
               </div>
             </Poptip>
           </li>
         </ul>
+        <div class="restaurant-loading" v-if="restaurantsLoading">
+          <img src="../assets/loading.gif">
+          <span>正在载入更多商家...</span>
+        </div>
+        <div
+          class="restaurant-loadmore"
+          v-if="!restaurantsLoading&&restaurantsCount>restaurants.length"
+          @click="getNextPage()"
+        >点击加载更多商家...</div>
       </div>
     </div>
   </div>
@@ -123,6 +147,24 @@ import globalTools from "../utils/tools.js";
 //   console.log(data);
 // });
 
+const pageLimit = 24;
+const getRestaurants = (vm, offset) => {
+  vueFetch("GET", "restaurants", {
+    "extras[]": "activities",
+    geohash: "wtsmyu9gjfzu",
+    latitude: 31.973492,
+    limit: pageLimit,
+    longitude: 118.775854,
+    offset: offset,
+    terminal: "web"
+  }).then(data => {
+    if (data && Array.isArray(data)) {
+      vm.$data.restaurants = [...vm.$data.restaurants, ...data];
+    }
+    vm.$data.restaurantsLoading = false;
+  });
+};
+
 export default {
   name: "Restaurants",
   data() {
@@ -132,10 +174,21 @@ export default {
       restaurants: [],
       selectedIndex: 0,
       subSelectedIndex: 0,
-      itemsPerLine: document.body.clientWidth >= 1260 ? 4 : 3
+      itemsPerLine: document.body.clientWidth >= 1260 ? 4 : 3,
+      restaurantsLoading: true,
+      restaurantsCount: 0,
+      page: 0
     };
   },
-  computed: {},
+  computed: {
+    // showMoreArea() {
+    //   console.log(this.$data);
+    //   return (
+    //     !this.$data.restaurantsLoading &&
+    //     this.$data.restaurantsCount > this.$data.restaurants.length
+    //   );
+    // }
+  },
   methods: {
     changeCagegory(index) {
       if (index === this.$data.selectedIndex) return;
@@ -164,10 +217,12 @@ export default {
     gotoDetail(index) {
       console.log(index);
     },
-    getSortFlags(list) {
-      return list.sort(function(a, b) {
-        return a.id - b.id;
-      });
+    getNextPage() {
+      this.$data.restaurantsLoading = true;
+      const page = this.$data.page + 1;
+      this.$data.page = page;
+      const offset = page * pageLimit;
+      getRestaurants(this, offset);
     }
   },
   components: {
@@ -184,22 +239,11 @@ export default {
       console.log("data response");
       if (data && Array.isArray(data)) {
         this.$data.categorys = data;
+        this.$data.restaurantsCount = parseInt(data[0].count, 10);
         // this.$set(this.$data, "categorys", data);
       }
     });
-    vueFetch("GET", "restaurants", {
-      "extras[]": "activities",
-      geohash: "wtsmyu9gjfzu",
-      latitude: 31.973492,
-      limit: 24,
-      longitude: 118.775854,
-      offset: 0,
-      terminal: "web"
-    }).then(data => {
-      if (data && Array.isArray(data)) {
-        this.$data.restaurants = data;
-      }
-    });
+    getRestaurants(this, 0);
     // window.onresize = () => {
     //   this.$data.itemsPerLine = document.body.clientWidth >= 1260 ? 4 : 3;
     // };
@@ -287,6 +331,7 @@ export default {
   height: auto;
   list-style: none;
   display: inline-block;
+  margin-bottom: -5px;
 }
 .merchant-li {
   height: 140px;
@@ -326,6 +371,12 @@ export default {
     font-weight: 400;
     font-size: 12px;
     color: #999;
+  }
+  .time-normal {
+    color: #999;
+  }
+  .time-long {
+    color: #c00;
   }
 }
 .merchant-main {
@@ -401,7 +452,7 @@ export default {
 }
 .poptip-merchant {
   width: 292px;
-  min-height: 140px;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -415,6 +466,7 @@ export default {
   height: auto;
   padding: 5px 0;
   border-bottom: 1px solid #dcdcdc;
+  margin-bottom: 5px;
   & > span {
     width: auto;
     height: auto;
@@ -438,5 +490,55 @@ export default {
   white-space: normal;
   text-align: left;
 }
-</style>
+.merchant-time-fee {
+  display: table;
+  background-color: #f2f2f2;
+  padding: 8px 0;
+  margin-top: 10px;
+  li {
+    display: table-cell;
+    font-size: 12px;
+    color: #333;
+  }
+  li:last-child {
+    border-left: 1px solid #ddd;
+  }
 
+  span {
+    color: #f74342;
+    margin-right: 3px;
+  }
+}
+.merchant-promotion {
+  height: auto;
+  color: #999;
+  font-size: 12px;
+  white-space: normal;
+  word-break: break-all;
+  margin-top: 20px;
+  text-align: left;
+}
+.restaurant-loading {
+  width: 100%;
+  height: 150px;
+  @include flexRowCenterCenter;
+  & > img {
+    width: 36px;
+    height: 36px;
+  }
+  & > span {
+    font-size: 14px;
+    color: #999;
+  }
+}
+.restaurant-loadmore {
+  width: 100%;
+  height: 54px;
+  background-image: linear-gradient(to bottom, #f9f9f9, #eee);
+  color: #777;
+  font-size: 18px;
+  line-height: 54px;
+  text-align: center;
+  cursor: pointer;
+}
+</style>
