@@ -37,29 +37,57 @@
 
       <div class="content-merchant">
         <ul class="merchant-ul">
-          <li class="merchant-width merchant-li" v-for="merchant in restaurants" :key="merchant.id">
-            <div class="merchant-logo-area">
-              <img :src="getLogoPath(merchant.image_path)">
-              <span>{{merchant.order_lead_time + ' 分钟'}}</span>
-            </div>
-            <div class="merchant-main">
-              <span class="merchant-name">{{merchant.name}}</span>
-              <Rate disabled show-text :value="merchant.rating"></Rate>
-              <span class="merchant-fee">{{merchant.piecewise_agent_fee.description}}</span>
-              <div class="merchant-flags">
-                <span class="support-flag support-flag-new" v-if="merchant.is_new">新</span>
-                <span
-                  class="support-flag"
-                  v-for="support in merchant.supports"
-                  :key="support.id"
-                >{{support.icon_name}}</span>
-              </div>
-              <div class="grey-rate" :style="getRateGrey(merchant.rating)">
-                <div class="grey-rate-container">
-                  <Rate disabled :value="0"></Rate>
+          <li
+            class="merchant-width merchant-li"
+            v-for="(merchant, index) in restaurants"
+            :key="merchant.id"
+            @click="gotoDetail(index)"
+          >
+            <Poptip
+              trigger="hover"
+              content="message"
+              class="merchant-poptip"
+              placement="right-start"
+            >
+              <div class="merchant-in-tip">
+                <div class="merchant-logo-area">
+                  <img :src="getLogoPath(merchant.image_path)">
+                  <span>{{merchant.order_lead_time + ' 分钟'}}</span>
+                </div>
+                <div class="merchant-main">
+                  <span class="merchant-name">{{merchant.name}}</span>
+                  <Rate disabled show-text :value="merchant.rating"></Rate>
+                  <span class="merchant-fee">{{merchant.piecewise_agent_fee.description}}</span>
+                  <div class="merchant-flags">
+                    <span class="support-flag support-flag-new" v-if="merchant.is_new">新</span>
+                    <span
+                      class="support-flag"
+                      v-for="support in merchant.supports"
+                      :key="support.id"
+                    >{{support.icon_name}}</span>
+                  </div>
+                  <div class="grey-rate" :style="getRateGrey(merchant.rating)">
+                    <div class="grey-rate-container">
+                      <Rate disabled :value="0"></Rate>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+              <div class="poptip-merchant" slot="content">
+                <span class="merchant-name">{{merchant.name}}</span>
+                <div class="merchant-subtitle-area">
+                  <span v-for="flavor in merchant.flavors" :key="flavor.id">{{flavor.name}}</span>
+                </div>
+                <div class="merchant-rstFlag" v-if="merchant.is_new">
+                  <span class="support-flag support-flag-new" v-if="merchant.is_new">新</span>
+                  <span class="merchant-rst-desc">新店开张，欢迎光临</span>
+                </div>
+                <div class="merchant-rstFlag" v-for="flag in merchant.supports" :key="flag.id">
+                  <span class="support-flag">{{flag.icon_name}}</span>
+                  <span class="merchant-rst-desc">{{flag.description}}</span>
+                </div>
+              </div>
+            </Poptip>
           </li>
         </ul>
       </div>
@@ -68,7 +96,7 @@
 </template>
 
 <script>
-import { Rate } from "iview";
+import { Rate, Poptip } from "iview";
 import ContentHeader from "../components/ContentHeader.vue";
 import vueFetch from "../utils/connection.js";
 import globalTools from "../utils/tools.js";
@@ -103,7 +131,8 @@ export default {
       subCategorys: [],
       restaurants: [],
       selectedIndex: 0,
-      subSelectedIndex: 0
+      subSelectedIndex: 0,
+      itemsPerLine: document.body.clientWidth >= 1260 ? 4 : 3
     };
   },
   computed: {},
@@ -131,17 +160,28 @@ export default {
         width: width + "px",
         marginLeft: 100 - width + "px"
       };
+    },
+    gotoDetail(index) {
+      console.log(index);
+    },
+    getSortFlags(list) {
+      return list.sort(function(a, b) {
+        return a.id - b.id;
+      });
     }
   },
   components: {
     ContentHeader,
-    Rate
+    Rate,
+    Poptip
   },
-  mounted() {
+  created() {
+    console.log("created");
     vueFetch("GET", "category", {
       latitude: 31.973492,
       longitude: 118.775854
     }).then(data => {
+      console.log("data response");
       if (data && Array.isArray(data)) {
         this.$data.categorys = data;
         // this.$set(this.$data, "categorys", data);
@@ -160,12 +200,19 @@ export default {
         this.$data.restaurants = data;
       }
     });
+    // window.onresize = () => {
+    //   this.$data.itemsPerLine = document.body.clientWidth >= 1260 ? 4 : 3;
+    // };
+  },
+  mounted() {
+    console.log("mounted");
   }
 };
 </script>
 
 
 <style lang="scss">
+@import "../common.scss";
 .content-category {
   width: 100%;
   height: auto;
@@ -177,6 +224,7 @@ export default {
   font-size: 14px;
   padding: 10px;
   border: 1px solid #e6e6e6;
+  transition: height 1s;
 }
 .content-all-category {
   color: #999;
@@ -244,14 +292,24 @@ export default {
   height: 140px;
   float: left;
   cursor: pointer;
+}
+.merchant-li:hover {
+  background-color: #f5f5f5;
+}
+.merchant-poptip {
+  width: 100%;
+  & > .ivu-poptip-rel {
+    width: 100%;
+  }
+}
+.merchant-in-tip {
   padding: 20px;
+  width: 100%;
+  height: 140px;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-}
-.merchant-li:hover {
-  background-color: #f5f5f5;
 }
 .merchant-logo-area {
   width: 70px;
@@ -337,6 +395,48 @@ export default {
   & > span:last-child {
     display: none;
   }
+}
+.ivu-poptip-inner {
+  padding: 16px 14px;
+}
+.poptip-merchant {
+  width: 292px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  & > * {
+    width: 100%;
+  }
+}
+.merchant-subtitle-area {
+  display: block;
+  height: auto;
+  padding: 5px 0;
+  border-bottom: 1px solid #dcdcdc;
+  & > span {
+    width: auto;
+    height: auto;
+    font-size: 12px;
+    float: left;
+    margin-right: 4px;
+    color: #999;
+  }
+}
+.merchant-rstFlag {
+  height: auto;
+  @include flexRowStartStart;
+  margin-top: 5px;
+}
+.merchant-rst-desc {
+  height: auto;
+  font-size: 12px;
+  color: #666;
+  flex: 1;
+  margin-left: 2px;
+  white-space: normal;
+  text-align: left;
 }
 </style>
 
