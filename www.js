@@ -31,6 +31,27 @@ app.use('/', function (req, res, next) {
 });
 
 let allRestaurants = [];
+const getAllRestaurants = () => {
+  if (allRestaurants.length < 1) {
+    fs.open('./docs/restaurants.json', 'r', function (err, fd) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      fs.readFile('./docs/restaurants.json', function (error, data) {
+        // console.log(data.toString());
+        const list = JSON.parse(data.toString());
+        allRestaurants = list;
+        console.log(list.length);
+
+        fs.close(fd, function () {
+          console.log('close file');
+        });
+
+      });
+    });
+  }
+}
 
 app.post('/api/map', function (req, res) {
   console.log(req.query);
@@ -61,26 +82,8 @@ app.get('/api/restaurants', function (req, res) {
   const end = start + len;
   console.log(`start === ${start}, end === ${end}`);
 
-  if (allRestaurants.length < 1) {
-    fs.open('./docs/restaurants.json', 'r', function (err, fd) {
-      if (err) {
-        console.log(err);
-        res.status(404).end();
-      }
-      fs.readFile('./docs/restaurants.json', function (error, data) {
-        // console.log(data.toString());
-        const list = JSON.parse(data.toString());
-        console.log(list.length);
+  res.send(allRestaurants.slice(start, Math.min(allRestaurants.length, end))).end();
 
-        fs.close(fd, function (err) {
-          res.send(list.slice(start, Math.min(list.length, end))).end();
-        });
-
-      });
-    });
-  } else {
-    res.send(allRestaurants.slice(start, Math.min(allRestaurants.length, end))).end();
-  }
 });
 
 app.get('/api/repeat', function (req, res) {
@@ -129,6 +132,17 @@ app.get('/api/category', function (req, res) {
   });
 });
 
+app.get('/api/merchant', function (req, res) {
+  const id = req.query.id;
+  const result = allRestaurants.find((e) => e.id === id);
+  if (result) {
+    res.send(result).end();
+  } else {
+    res.status(404).end();
+  }
+});
+
 app.listen('8008', function () {
-  console.log('runing on port 8008.')
+  console.log('runing on port 8008.');
+  getAllRestaurants();
 });

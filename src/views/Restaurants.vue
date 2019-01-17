@@ -39,9 +39,9 @@
         <ul class="merchant-ul">
           <li
             class="merchant-width merchant-li"
-            v-for="(merchant, index) in restaurants"
+            v-for="merchant in restaurants"
             :key="merchant.id"
-            @click="gotoDetail(index)"
+            @click="gotoDetail(merchant.id)"
           >
             <Poptip
               trigger="hover"
@@ -60,7 +60,7 @@
                 </div>
                 <div class="merchant-main">
                   <span class="merchant-name">{{merchant.name}}</span>
-                  <Rate disabled show-text :value="merchant.rating"></Rate>
+                  <CustomRate :rating="merchant.rating" :text="merchant.rating" text-color="#999"/>
                   <span class="merchant-fee">{{merchant.piecewise_agent_fee.description}}</span>
                   <div class="merchant-flags">
                     <span class="support-flag support-flag-new" v-if="merchant.is_new">新</span>
@@ -69,11 +69,6 @@
                       v-for="support in merchant.supports"
                       :key="support.id"
                     >{{support.icon_name}}</span>
-                  </div>
-                  <div class="grey-rate" :style="getRateGrey(merchant.rating)">
-                    <div class="grey-rate-container">
-                      <Rate disabled :value="0"></Rate>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -120,10 +115,11 @@
 </template>
 
 <script>
-import { Rate, Poptip } from "iview";
+import { Poptip } from "iview";
 import ContentHeader from "../components/ContentHeader.vue";
 import vueFetch from "../utils/connection.js";
 import globalTools from "../utils/tools.js";
+import CustomRate from "../components/CustomRate.vue";
 
 // let categorys = [];
 // vueFetch("GET", "category", {
@@ -214,8 +210,13 @@ export default {
         marginLeft: 100 - width + "px"
       };
     },
-    gotoDetail(index) {
-      console.log(index);
+    gotoDetail(id) {
+      this.$router.push({
+        name: "Detail",
+        params: {
+          id
+        }
+      });
     },
     getNextPage() {
       this.$data.restaurantsLoading = true;
@@ -227,7 +228,7 @@ export default {
   },
   components: {
     ContentHeader,
-    Rate,
+    CustomRate,
     Poptip
   },
   created() {

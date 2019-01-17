@@ -2,17 +2,19 @@
   <div id="main">
     <Layout>
       <Header class="custom-header" :class="getCustomBg">
-        <div class="main-width main-header">
-          <div class="main-header-left">
-            <i class="main-header-logo icon-eleme topbar-logo"></i>
-            <Menu mode="horizontal" active-name="/" theme="primary">
-              <MenuItem to="/home" name="/">首页</MenuItem>
-              <MenuItem to="/order" name="/order">我的订单</MenuItem>
-              <MenuItem to="/join" name="/join">加盟合作</MenuItem>
-              <MenuItem to="/service" name="/service">我的客服</MenuItem>
-            </Menu>
+        <div class="main-header-container">
+          <div class="main-width main-header">
+            <div class="main-header-left">
+              <i class="main-header-logo icon-eleme topbar-logo"></i>
+              <Menu mode="horizontal" active-name="/" theme="primary">
+                <MenuItem to="/home" name="/">首页</MenuItem>
+                <MenuItem to="/order" name="/order">我的订单</MenuItem>
+                <MenuItem to="/join" name="/join">加盟合作</MenuItem>
+                <MenuItem to="/service" name="/service">我的客服</MenuItem>
+              </Menu>
+            </div>
+            <div class="main-header-right"></div>
           </div>
-          <div class="main-header-right"></div>
         </div>
       </Header>
       <Content>
@@ -38,7 +40,7 @@ export default {
   name: "Main",
   computed: {
     getCustomBg() {
-      return this.$route.path === "/merchant"
+      return this.$route.name === "Detail"
         ? "custom-header-bgimg"
         : "custom-header-bgcolor";
     }
@@ -55,17 +57,23 @@ export default {
   width: 100%;
   padding: 0 !important;
   height: 60px !important;
-  z-index: 999;
 }
 .custom-header-bgcolor {
-  background-color: #1e89e0 !important;
+  background-image: none;
+  background-color: transparent !important;
+  .main-header-container {
+    background-color: #1e89e0;
+  }
 }
 .custom-header-bgimg {
-  background-color: rgba(0, 0, 0, 0.4) !important;
   background-image: url("../assets/shop-bg.jpg") !important;
   background-position: 0 0 !important;
   background-repeat: no-repeat !important;
   background-size: 1920px 190px !important;
+  background-color: transparent !important;
+  .main-header-container {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
 }
 .ivu-layout {
   height: 100%;
@@ -75,6 +83,9 @@ export default {
 }
 .main-width {
   width: 962px;
+}
+.main-header-container {
+  height: 100%;
 }
 .main-header {
   height: 100%;

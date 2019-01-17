@@ -1,4 +1,6 @@
 const convertImagePath = str => {
+  if (!str) return '';
+
   const host = '//fuss10.elemecdn.com';
 
   const urlFlag = /\/dist|static\.alpha\.elenet\.me|static\.beta\.elenet\.me|static\.elenet\.me|static11\.elemecdn\.com|(faas|shadow)\.elemecdn\.com|cdn\.faas\.elenet\.me/.test(str);

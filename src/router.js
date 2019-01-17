@@ -5,6 +5,7 @@ import Restaurants from './views/Restaurants.vue';
 import Order from './views/Order.vue';
 import Join from './views/Join.vue';
 import Service from './views/Service.vue';
+import Detail from './views/Detail.vue';
 
 Vue.use(Router)
 
@@ -32,6 +33,10 @@ export default new Router({
       path: '/service',
       name: 'Service',
       component: Service
+    }, {
+      path: '/merchant/:id',
+      name: 'Detail',
+      component: Detail
     }
   ]
 })
