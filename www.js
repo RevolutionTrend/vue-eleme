@@ -1,10 +1,18 @@
 const express = require('express');
 const app = express();
+// const $ = require('jquery');
+// const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 const bodyParser = require('body-parser');
 const http = require('http');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
+
+// $.support.cors = true;
+// $.ajaxSettings.xhr = function () {
+//   return new XMLHttpRequest();
+// }
+// $.ajaxSettings.xhr = new XMLHttpRequest();
 
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -28,6 +36,34 @@ app.use('/', function (req, res, next) {
     }
     res.sendFile(__dirname + '/dist' + pathname);
   }
+});
+
+app.post('/api/web', function (req, res) {
+  const token = 'eJx10kuTojAQAOD/wlVK8iAk8eYLBkVRdHSdqTkA4shDdBBB3dr/vgm16mkpqvjSNN2h4bdS2FulA4E4qKpUUaF0FNgGbUNRlfIs7hCdUsAJAxwiVQmfMQgh4DrgqhIUq4HS+YTIACrH7EtGPBH4hBwBFQIGvtSHdWGki1Nm2SJJ2ZflqaNptR8f/Lh9iOLy4uft8HjQ9sdDpNXl+XCr6istEii29P/sPKr/he18G10V0eCwlA0MilSMqHwhg+IX9RfJi/RF9iRrHqOSHEiyhsaDFEBJ3lDWZaAheZE+CcGLsi6DDWU3hiQRepE8iZu6RFLnknI71CBPMvag+FaCXLZgUG6SywoMy268SSCiBQZNlDBJLCmLYaBL0oZNLhONMQRyoKkcqLj6z8ESBNWBvZLjIIZY0WYlUspH6kT8UOL2Of7OhaLRdZqkpVOD7vt+xx0TpihZZOO9mR5/zK7pBMSfsmk6Oc1Ct6/lOPbcHQVejD1cHbWBvrilw038PTTCd3Pk9s3ezvoYbeaXme9ehsv0qB9tXFj3bJ24P0bh7uz5GltnUPQn4wynrX7Q7WfZpjcI7fIUbAkx8HgExsH1klO7+jDNdFFcpqFvBm9w6A1dvzS29sdomfrovul6p7cbCqyrlbbyC7qVvbfWmQ/6DrODyruTcL7Btb249WZZPrfyqNc7ZedJd+BP0C2I4sqhXpU4wZwDNtMDADfTyZLw1TloGTserxAd0RO1NGdb8Gv97dO77/6qNlBf64mZaEaNp47y5y/vgPe2';
+  const PARAM = {
+    classify_type: 'cate_all',
+    mtsi_font_css_version: '20ad699b',
+    originUrl: 'http%3A%2F%2Fwaimai.meituan.com%2Fhome%2Fwtsmyvwx7rj1',
+    page_offset: 1,
+    page_size: 20,
+    partner: 4,
+    platform: 1,
+    price_type: 0,
+    sort_type: 0,
+    support_invoice: 0,
+    support_logistic: 0,
+    support_online_pay: 0,
+    uuid: 'tgycV13BEfo9lQzbdSOpyqjicyPk91YAKLX3Q3hWtvjF1gYZvifsGJntTYbtsXJa'
+  };
+  $.ajax({
+    url: '/ajax/poilist?_token=' + token,
+    type: 'POST',
+    dataType: 'json',
+    data: PARAM
+  }).done(function (status) {
+    console.log(status);
+    res.send(status).end();
+  });
 });
 
 let allRestaurants = [];
