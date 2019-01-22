@@ -178,6 +178,27 @@ app.get('/api/merchant', function (req, res) {
   }
 });
 
+app.get('/api/menu', function (req, res) {
+  const id = req.query.id;
+  fs.open('./docs/menus.json', 'r', function (err, fd) {
+    if (err) {
+      console.log(err);
+      res.status(404).end();
+    }
+    fs.readFile('./docs/menus.json', function (error, data) {
+      const arr = JSON.parse(data.toString());
+      const restaurant = arr.find(function (e) {
+        return e.restaurant_id === id;
+      });
+      const menu = restaurant && restaurant.menu ? restaurant.menu : [];
+
+      fs.close(fd, function () {
+        res.send(menu).end();
+      });
+    })
+  });
+});
+
 app.listen('8008', function () {
   console.log('runing on port 8008.');
   getAllRestaurants();

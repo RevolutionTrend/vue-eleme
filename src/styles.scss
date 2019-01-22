@@ -19,12 +19,20 @@ body,
   text-transform: none;
 }
 
-.topbar-logo:before {
+.topbar-logo::before {
   content: "\e92c";
 }
 
-.icon-mobile:before {
+.icon-mobile::before {
   content: "\e92e";
+}
+
+.icon-favorite::before {
+  content: "\e919";
+}
+
+.icon-unfavorite::before {
+  content: "\e953";
 }
 
 .content-header {
