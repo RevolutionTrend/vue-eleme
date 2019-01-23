@@ -129,6 +129,9 @@ export default {
     border-radius: 50%;
     border: 4px solid rgba(255, 255, 255, 0.3);
   }
+  &:hover {
+    height: auto;
+  }
 }
 .detail-header-nameAndRate {
   flex: 1;

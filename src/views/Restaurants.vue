@@ -109,6 +109,17 @@
           v-if="!restaurantsLoading&&restaurantsCount>restaurants.length"
           @click="getNextPage()"
         >点击加载更多商家...</div>
+        <table>
+          <tr v-for="shop in restaurants" :key="shop.id">
+            <td>
+              <span v-for="flvor in shop.flavors" :key="flvor.id">
+                insert into eleme.flavors(restaurant_id,id,name) values(
+                "{{shop.id}}",{{flvor.id}},"{{flvor.name}}"
+                );
+              </span>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   </div>
@@ -211,12 +222,27 @@ export default {
       };
     },
     gotoDetail(id) {
-      this.$router.push({
-        name: "Detail",
-        params: {
-          id
+      // this.$router.push({
+      //   name: "Detail",
+      //   params: {
+      //     id
+      //   }
+      // });
+      console.log(id);
+      const str =
+        "id, act_tag, name, description, address, authentic_id, business_info,delivery_fee_discount, distance, favored,float_delivery_fee, float_minimum_order_amount, has_story, image_path, is_new, is_premium, is_star, latitude, longitude, order_lead_time, out_of_range,phone, promotion_info, rating, rating_count, recent_order_num";
+      const list = str.split(",");
+      const shop = this.$data.restaurants[0];
+      let arr = [];
+      for (let i = 0; i < list.length; i++) {
+        const key = list[i].trim();
+        if (typeof shop[key] === "string") {
+          arr.push(`"{{shop.${key}}}"`);
+        } else {
+          arr.push(`{{shop.${key}}}`);
         }
-      });
+      }
+      console.log(arr.join(","));
     },
     getNextPage() {
       this.$data.restaurantsLoading = true;
@@ -224,6 +250,13 @@ export default {
       this.$data.page = page;
       const offset = page * pageLimit;
       getRestaurants(this, offset);
+    },
+    getInsertSql(shop) {
+      let str =
+        "insert into eleme.restaurants(id, act_tag, name, description, address, authentic_id, business_info,delivery_fee_discount, distance, favored, float_delivery_fee, float_minimum_order_amount, has_story, image_path, is_new, is_premium, is_star, latitude, longitude, order_lead_time, out_of_range, phone, promotion_info, rating, rating_count, recent_order_num) values(";
+      str += shop.id;
+      str = +");";
+      return str;
     }
   },
   components: {
